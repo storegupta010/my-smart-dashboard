@@ -81,6 +81,19 @@ function Dashboard() {
   const [open, setOpen] = useState<number | null>(null);
   const [active, setActive] = useState(0);
   const timers = useRef<number[]>([]);
+  const [collapsed, setCollapsed] = useState(false);
+  const [tilt, setTilt] = useState<[number, number]>([0, 0]);
+  const [hidden, setHidden] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const v = () => setHidden(document.hidden);
+    const k = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); inputRef.current?.focus(); }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") { e.preventDefault(); setCollapsed((c) => !c); }
+    };
+    document.addEventListener("visibilitychange", v); window.addEventListener("keydown", k);
+    return () => { document.removeEventListener("visibilitychange", v); window.removeEventListener("keydown", k); };
+  }, []);
   const clear = () => { timers.current.forEach(clearTimeout); timers.current = []; };
   useEffect(() => clear, []);
   useEffect(() => {
@@ -93,16 +106,17 @@ function Dashboard() {
     const q = cmd.toLowerCase();
     const idx = nav.findIndex(([, l]) => q.includes(l.toLowerCase().split(" ")[0] ?? ""));
     timers.current.push(window.setTimeout(() => setCore("executing"), 900));
-    timers.current.push(window.setTimeout(() => { setCore("verifying"); if (idx >= 0) { setActive(idx); setOpen(idx); } }, 1800));
-    timers.current.push(window.setTimeout(() => setCore("idle"), 2700));
+    timers.current.push(window.setTimeout(() => setCore("verifying"), 1800));
+    timers.current.push(window.setTimeout(() => { if (idx >= 0) { setCore("completed"); setActive(idx); setOpen(idx); } else setCore("error"); }, 2700));
+    timers.current.push(window.setTimeout(() => setCore("idle"), 4200));
     setCmd("");
   };
   const openModule = (i: number) => { setActive(i); setOpen(i); };
   return (
-    <div className="min-h-screen text-foreground">
+    <div className={`min-h-screen text-foreground ${hidden || open !== null ? "paused" : ""}`}>
       {/* Top bar */}
       <header className="flex items-center gap-4 px-4 py-2">
-        <Menu className="h-6 w-6 text-primary" />
+        <button onClick={() => setCollapsed((c) => !c)} aria-label="Toggle menu (Ctrl+B)" title="Toggle menu (Ctrl+B)" className="rounded p-1 hover:bg-muted"><Menu className="h-6 w-6 text-primary" /></button>
         <div className="flex items-center gap-2">
           <div className="grid h-11 w-11 place-items-center rounded-full border-2 border-primary glow-icon font-display text-xl font-black text-primary">S</div>
           <div>
@@ -128,11 +142,11 @@ function Dashboard() {
 
       <div className="flex gap-3 px-2 pb-4">
         {/* Sidebar */}
-        <aside className="hidden w-40 shrink-0 flex-col gap-1 lg:flex">
+        <aside className={`hidden shrink-0 flex-col gap-1 transition-all duration-300 lg:flex ${collapsed ? "w-14" : "w-40"}`}>
           {nav.map(([I, label], i) => (
-            <button key={label} onClick={() => openModule(i)} className={`depth-card flex items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm transition ${i === active ? "border-l-2 border-primary bg-primary/20 font-semibold" : "hover:bg-muted"}`}>
+            <button key={label} onClick={() => openModule(i)} title={label} className={`depth-card flex items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm transition ${i === active ? "border-l-2 border-primary bg-primary/20 font-semibold" : "hover:bg-muted"}`}>
               <span className="grid h-8 w-8 place-items-center rounded-full border border-border bg-muted/50"><I className="h-4 w-4 text-primary glow-icon" /></span>
-              {label}
+              {!collapsed && label}
             </button>
           ))}
         </aside>
@@ -178,8 +192,8 @@ function Dashboard() {
                 </div>
 
                 {/* Jarvis core */}
-                <div className="relative overflow-hidden rounded-lg">
-                  <JarvisCore state={core} />
+                <div className="relative overflow-hidden rounded-lg" onMouseMove={(e) => { const b = e.currentTarget.getBoundingClientRect(); setTilt([(e.clientX - b.left) / b.width - 0.5, (e.clientY - b.top) / b.height - 0.5]); }} onMouseLeave={() => setTilt([0, 0])}>
+                  <JarvisCore state={core} tilt={tilt} />
                   <div className="relative text-center">
                     <div className="pt-3 font-display text-3xl font-black tracking-[0.3em] text-primary glow-text">JARVIS</div>
                     <div className="font-display text-[10px] tracking-[0.3em] text-accent">AI COMMAND CENTER</div>
@@ -248,8 +262,8 @@ function Dashboard() {
 
           {/* Voice bar */}
           <div className="panel mx-auto flex w-full max-w-4xl items-center gap-4 rounded-full px-3 py-2">
-            <button aria-label="Talk to Jarvis" onClick={() => { clear(); setCore(core === "listening" ? "idle" : "listening"); }} className={`grid h-14 w-14 place-items-center rounded-full border-2 border-primary glow-icon ${core === "listening" ? "core-pulse bg-primary/20" : ""}`}><Mic className="h-6 w-6 text-primary" /></button>
-            <input value={cmd} onChange={(e) => { setCmd(e.target.value); if (core === "idle" && e.target.value) setCore("listening"); if (!e.target.value && core === "listening") setCore("idle"); }} onKeyDown={(e) => e.key === "Enter" && run()} aria-label="Command Jarvis" className="min-w-0 flex-1 bg-transparent text-lg outline-none placeholder:text-muted-foreground" placeholder="Hey Jarvis, how can I help you today?" />
+            <button aria-label="Talk to Jarvis" onClick={() => { clear(); setCore(core === "listening" ? "idle" : "listening"); inputRef.current?.focus(); }} className={`grid h-14 w-14 place-items-center rounded-full border-2 border-primary glow-icon ${core === "listening" ? "core-pulse bg-primary/20" : ""}`}><Mic className="h-6 w-6 text-primary" /></button>
+            <input ref={inputRef} title="Focus with Ctrl+K" value={cmd} onChange={(e) => { setCmd(e.target.value); if (core === "idle" && e.target.value) setCore("listening"); if (!e.target.value && core === "listening") setCore("idle"); }} onKeyDown={(e) => e.key === "Enter" && run()} aria-label="Command Jarvis" className="min-w-0 flex-1 bg-transparent text-lg outline-none placeholder:text-muted-foreground" placeholder="Hey Jarvis, how can I help you today?  (Ctrl+K)" />
             {[[UserCog, "Agents"], [Wrench, "Tools"], [FileText, "Files"], [Globe, "Web"]].map(([I, l]) => {
               const Icon = I as typeof Globe;
               const i = nav.findIndex(([, n]) => n === (l === "Agents" ? "Agents" : l === "Tools" ? "Development" : l === "Files" ? "Projects" : "APIs"));
