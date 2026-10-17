@@ -1,8 +1,8 @@
-import jarvis from "@/assets/jarvis.jpg";
+import ayra from "@/assets/ayra.jpg";
 
-export type CoreState = "idle" | "listening" | "thinking" | "executing" | "verifying" | "completed" | "error";
+export type CoreState = "idle" | "listening" | "thinking" | "executing" | "verifying" | "speaking" | "completed" | "error";
 export const stateLabel: Record<CoreState, string> = {
-  idle: "Standing by", listening: "Listening…", thinking: "Thinking…", executing: "Executing…", verifying: "Verifying…", completed: "Task completed", error: "Command not recognised",
+  idle: "Standing by", listening: "Listening…", thinking: "Thinking…", executing: "Executing…", verifying: "Verifying…", speaking: "AYRA is responding…", completed: "Task completed", error: "Command not recognised",
 };
 
 /** Animated AI core: rings, aura and neural streams react to `state`. */
@@ -26,8 +26,17 @@ export function JarvisCore({ state, tilt = [0, 0] }: { state: CoreState; tilt?: 
           </div>
         )}
         <div className="core-aura absolute inset-[22%] rounded-full" />
-        <img src={jarvis} alt="Jarvis AI core" width={1024} height={1024}
+        <div className="ayra-breathe absolute inset-0">
+        <img src={ayra} alt="AYRA holographic AI avatar" width={1024} height={1024}
           className="core-pulse absolute inset-0 h-full w-full rounded-full object-cover [mask-image:radial-gradient(circle,black_42%,transparent_68%)]" />
+          <span className="ayra-eye absolute left-[37.5%] top-[39.5%] h-[3%] w-[7%] rounded-full bg-accent mix-blend-screen blur-[3px]" />
+          <span className="ayra-eye absolute left-[55.5%] top-[39.5%] h-[3%] w-[7%] rounded-full bg-accent mix-blend-screen blur-[3px]" />
+          {state === "speaking" && <span className="ayra-mouth absolute left-[44%] top-[59.5%] h-[2.5%] w-[12%] rounded-full bg-accent mix-blend-screen blur-[3px]" />}
+        </div>
+        {(state === "listening" || state === "speaking") && [0, 0.8, 1.6].map((d) => (
+          <span key={d} className="ayra-ripple absolute inset-[18%] rounded-full border border-accent" style={{ animationDelay: `${d}s` }} />
+        ))}
+        <div className="ayra-orbit absolute inset-[4%]"><span className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 rounded-full bg-accent shadow-[0_0_12px_var(--accent)]" /></div>
         <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full">
           <g className="ring-spin origin-center" style={{ transformBox: "fill-box" }}>
             <circle cx="50" cy="50" r="44" fill="none" stroke="var(--primary)" strokeWidth=".4" strokeDasharray="8 4" opacity=".7" />
