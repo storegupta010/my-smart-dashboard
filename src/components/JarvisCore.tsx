@@ -1,12 +1,73 @@
-import ayra from "@/assets/ayra.jpg";
+import ayraDefault from "@/assets/ayra-cyan.jpg";
+import ayraCyanSide from "@/assets/ayra-cyan-side.jpg";
+import ayraCyanJacket from "@/assets/ayra-cyan-jacket.jpg";
+import ayraBraids from "@/assets/ayra-braids.jpg";
+import ayraAmberSide from "@/assets/ayra-amber-side.jpg";
+import ayraAmberFront from "@/assets/ayra-amber-front.jpg";
+import ayraAmberProfile from "@/assets/ayra-amber-profile.jpg";
+import ayraViolet from "@/assets/ayra-violet.jpg";
+import ayraHeadset from "@/assets/ayra-headset.jpg";
+import ayraGold from "@/assets/ayra-gold.jpg";
+import ayraBob from "@/assets/ayra-bob.jpg";
 
 export type CoreState = "idle" | "listening" | "thinking" | "executing" | "verifying" | "speaking" | "completed" | "error";
 export const stateLabel: Record<CoreState, string> = {
   idle: "Standing by", listening: "Listening…", thinking: "Thinking…", executing: "Executing…", verifying: "Verifying…", speaking: "AYRA is responding…", completed: "Task completed", error: "Command not recognised",
 };
 
-/** Animated AI core: rings, aura and neural streams react to `state`. */
+/** AYRA's looks — the same avatar photographed from different angles and outfits. */
+export const AYRA_LOOKS = {
+  default: ayraDefault,
+  cyanSide: ayraCyanSide,
+  cyanJacket: ayraCyanJacket,
+  braids: ayraBraids,
+  amberSide: ayraAmberSide,
+  amberFront: ayraAmberFront,
+  amberProfile: ayraAmberProfile,
+  violet: ayraViolet,
+  headset: ayraHeadset,
+  gold: ayraGold,
+  bob: ayraBob,
+} as const;
+export type AyraLook = keyof typeof AYRA_LOOKS;
+
+/** Which look AYRA wears per core state (when no occasion overrides it). */
+const stateLook: Record<CoreState, AyraLook> = {
+  idle: "default",
+  listening: "headset",
+  thinking: "cyanSide",
+  executing: "amberProfile",
+  verifying: "braids",
+  speaking: "cyanJacket",
+  completed: "amberFront",
+  error: "bob",
+};
+
+/**
+ * Special-day appearance calendar. Dates are month-day; AYRA wears the mapped
+ * look for the whole day (local timezone), then returns to her default look.
+ * NOTE: no true festival photos were provided yet — occasions reuse existing
+ * looks (gold = festive). Add festival photos to AYRA_LOOKS and point here.
+ */
+export const AYRA_SCHEDULE: { name: string; monthDay: string; look: AyraLook }[] = [
+  { name: "New Year", monthDay: "01-01", look: "gold" },
+  { name: "Republic Day", monthDay: "01-26", look: "cyanJacket" },
+  { name: "Holi", monthDay: "03-04", look: "violet" },
+  { name: "Independence Day", monthDay: "08-15", look: "amberFront" },
+  { name: "Diwali", monthDay: "11-08", look: "gold" },
+  { name: "Christmas", monthDay: "12-25", look: "violet" },
+];
+
+/** Occasion active today, if any. First match wins (no conflicts). */
+export function activeOccasion(now = new Date()) {
+  const md = `${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  return AYRA_SCHEDULE.find((o) => o.monthDay === md) ?? null;
+}
+
+/** Animated AI core: AYRA avatar, rings, aura and neural streams react to `state`. */
 export function JarvisCore({ state, tilt = [0, 0] }: { state: CoreState; tilt?: [number, number] }) {
+  const occasion = activeOccasion();
+  const look = occasion ? occasion.look : stateLook[state];
   const nodes = Array.from({ length: 14 }, (_, i) => {
     const a = (i / 14) * Math.PI * 2;
     return [50 + Math.cos(a) * 46, 50 + Math.sin(a) * 46] as const;
@@ -27,11 +88,12 @@ export function JarvisCore({ state, tilt = [0, 0] }: { state: CoreState; tilt?: 
         )}
         <div className="core-aura absolute inset-[22%] rounded-full" />
         <div className="ayra-breathe absolute inset-0">
-        <img src={ayra} alt="AYRA holographic AI avatar" width={1024} height={1024}
-          className="core-pulse absolute inset-0 h-full w-full rounded-full object-cover [mask-image:radial-gradient(circle,black_42%,transparent_68%)]" />
-          <span className="ayra-eye absolute left-[37.5%] top-[39.5%] h-[3%] w-[7%] rounded-full bg-accent mix-blend-screen blur-[3px]" />
-          <span className="ayra-eye absolute left-[55.5%] top-[39.5%] h-[3%] w-[7%] rounded-full bg-accent mix-blend-screen blur-[3px]" />
-          {state === "speaking" && <span className="ayra-mouth absolute left-[44%] top-[59.5%] h-[2.5%] w-[12%] rounded-full bg-accent mix-blend-screen blur-[3px]" />}
+          {(Object.keys(AYRA_LOOKS) as AyraLook[]).map((k) => (
+            <img key={k} src={AYRA_LOOKS[k]} alt={k === look ? "AYRA holographic AI avatar" : ""} aria-hidden={k !== look}
+              width={768} height={768} loading={k === "default" ? "eager" : "lazy"}
+              className="core-pulse absolute inset-0 h-full w-full rounded-full object-cover transition-opacity duration-700 [mask-image:radial-gradient(circle,black_42%,transparent_68%)]"
+              style={{ opacity: k === look ? 1 : 0 }} />
+          ))}
         </div>
         {(state === "listening" || state === "speaking") && [0, 0.8, 1.6].map((d) => (
           <span key={d} className="ayra-ripple absolute inset-[18%] rounded-full border border-accent" style={{ animationDelay: `${d}s` }} />
