@@ -240,7 +240,7 @@ function Dashboard() {
             <div className="grid content-start gap-3">
               <div className="grid grid-cols-[1fr_130px] gap-3">
                 <div className="panel p-3">
-                  <div className="mb-2 flex items-center justify-between"><h3 className="font-display text-sm">JARVIS SYSTEM STATUS</h3><Live /></div>
+                  <div className="mb-2 flex items-center justify-between"><h3 className="font-display text-sm">AYRA SYSTEM STATUS</h3><Live /></div>
                   {status.map(([I, l, s]) => (<div key={l} className="flex items-center gap-2 py-1 text-sm"><I className="h-4 w-4 text-primary" /><span className="flex-1">{l}</span><span className="text-success">{s}</span></div>))}
                   <div className="flex items-center gap-2 py-1 text-sm"><Activity className="h-4 w-4 text-primary" /><span className="flex-1">System Load</span><div className="h-2 w-16 rounded bg-muted"><div className="h-2 w-1/4 rounded bg-primary" /></div>24%</div>
                 </div>
