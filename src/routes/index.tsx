@@ -91,7 +91,7 @@ function Dashboard() {
     if (!cmd.trim()) return;
     clear(); setCore("thinking");
     const q = cmd.toLowerCase();
-    const idx = nav.findIndex(([, l]) => q.includes(l.toLowerCase().split(" ")[0]));
+    const idx = nav.findIndex(([, l]) => q.includes(l.toLowerCase().split(" ")[0] ?? ""));
     timers.current.push(window.setTimeout(() => setCore("executing"), 900));
     timers.current.push(window.setTimeout(() => { setCore("verifying"); if (idx >= 0) { setActive(idx); setOpen(idx); } }, 1800));
     timers.current.push(window.setTimeout(() => setCore("idle"), 2700));
@@ -259,7 +259,7 @@ function Dashboard() {
           </div>
         </main>
       </div>
-      {open !== null && <ModulePanel index={open} title={nav[open][1]} Icon={nav[open][0]} onClose={() => setOpen(null)} />}
+      {open !== null && nav[open] && <ModulePanel index={open} title={nav[open]![1]} Icon={nav[open]![0]} onClose={() => setOpen(null)} />}
     </div>
   );
 }
