@@ -142,3 +142,43 @@
     color: var(--color-foreground);
   }
 }
+
+:root {
+  --background: oklch(0.13 0.04 258);
+  --foreground: oklch(0.95 0.02 230);
+  --card: oklch(0.17 0.05 255 / 0.75);
+  --card-foreground: oklch(0.95 0.02 230);
+  --primary: oklch(0.72 0.17 235);
+  --primary-foreground: oklch(0.13 0.04 258);
+  --muted: oklch(0.22 0.05 255);
+  --muted-foreground: oklch(0.72 0.05 240);
+  --accent: oklch(0.82 0.14 210);
+  --border: oklch(0.6 0.15 240 / 0.35);
+  --success: oklch(0.8 0.2 145);
+  --warn: oklch(0.8 0.16 75);
+  --danger: oklch(0.65 0.22 25);
+}
+@theme inline {
+  --color-success: var(--success);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --font-sans: "Rajdhani", "Exo 2", system-ui, sans-serif;
+  --font-display: "Orbitron", sans-serif;
+}
+body {
+  background: radial-gradient(ellipse at 50% 30%, oklch(0.22 0.09 250) 0%, var(--background) 60%);
+  font-family: var(--font-sans);
+}
+@utility panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  box-shadow: inset 0 0 18px oklch(0.6 0.18 240 / 0.15), 0 0 12px oklch(0.6 0.18 240 / 0.12);
+  backdrop-filter: blur(6px);
+}
+@utility glow-text {
+  text-shadow: 0 0 12px oklch(0.72 0.17 235 / 0.9);
+}
+@utility glow-icon {
+  filter: drop-shadow(0 0 6px oklch(0.72 0.17 235 / 0.9));
+}
