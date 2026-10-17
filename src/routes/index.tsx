@@ -107,7 +107,7 @@ function Dashboard() {
     const idx = nav.findIndex(([, l]) => q.includes(l.toLowerCase().split(" ")[0] ?? ""));
     timers.current.push(window.setTimeout(() => setCore("executing"), 900));
     timers.current.push(window.setTimeout(() => setCore("verifying"), 1800));
-    timers.current.push(window.setTimeout(() => { if (idx >= 0) { setCore("speaking"); timers.current.push(window.setTimeout(() => setCore("completed"), 1400)); setActive(idx); setOpen(idx); } else setCore("error"); }, 2700));
+    timers.current.push(window.setTimeout(() => { if (idx >= 0) { setCore("speaking"); timers.current.push(window.setTimeout(() => setCore("completed"), 1400)); timers.current.push(window.setTimeout(() => { setActive(idx); setOpen(idx); }, 2200)); } else setCore("error"); }, 2700));
     timers.current.push(window.setTimeout(() => setCore("idle"), 5600));
     setCmd("");
   };
