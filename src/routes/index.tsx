@@ -6,7 +6,9 @@ import {
   HardDrive, Activity, Brain, Zap, FileText, Target, Lightbulb, TrendingUp, Mic, Wrench, Send,
   Circle, CheckCircle2, AlertTriangle, Plug, CircleDot,
 } from "lucide-react";
-import jarvis from "@/assets/jarvis.jpg";
+import { useEffect, useRef, useState } from "react";
+import { JarvisCore, stateLabel, type CoreState } from "@/components/JarvisCore";
+import { ModulePanel } from "@/components/ModulePanel";
 import globe from "@/assets/globe.jpg";
 import worldmap from "@/assets/worldmap.jpg";
 
@@ -74,6 +76,28 @@ const actions = [
 ] as const;
 
 function Dashboard() {
+  const [core, setCore] = useState<CoreState>("idle");
+  const [cmd, setCmd] = useState("");
+  const [open, setOpen] = useState<number | null>(null);
+  const [active, setActive] = useState(0);
+  const timers = useRef<number[]>([]);
+  const clear = () => { timers.current.forEach(clearTimeout); timers.current = []; };
+  useEffect(() => clear, []);
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => e.key === "Escape" && setOpen(null);
+    window.addEventListener("keydown", k); return () => window.removeEventListener("keydown", k);
+  }, []);
+  const run = () => {
+    if (!cmd.trim()) return;
+    clear(); setCore("thinking");
+    const q = cmd.toLowerCase();
+    const idx = nav.findIndex(([, l]) => q.includes(l.toLowerCase().split(" ")[0] ?? ""));
+    timers.current.push(window.setTimeout(() => setCore("executing"), 900));
+    timers.current.push(window.setTimeout(() => { setCore("verifying"); if (idx >= 0) { setActive(idx); setOpen(idx); } }, 1800));
+    timers.current.push(window.setTimeout(() => setCore("idle"), 2700));
+    setCmd("");
+  };
+  const openModule = (i: number) => { setActive(i); setOpen(i); };
   return (
     <div className="min-h-screen text-foreground">
       {/* Top bar */}
@@ -106,10 +130,10 @@ function Dashboard() {
         {/* Sidebar */}
         <aside className="hidden w-40 shrink-0 flex-col gap-1 lg:flex">
           {nav.map(([I, label], i) => (
-            <a key={label} href="#" className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition ${i === 0 ? "border-l-2 border-primary bg-primary/20 font-semibold" : "hover:bg-muted"}`}>
+            <button key={label} onClick={() => openModule(i)} className={`depth-card flex items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm transition ${i === active ? "border-l-2 border-primary bg-primary/20 font-semibold" : "hover:bg-muted"}`}>
               <span className="grid h-8 w-8 place-items-center rounded-full border border-border bg-muted/50"><I className="h-4 w-4 text-primary glow-icon" /></span>
               {label}
-            </a>
+            </button>
           ))}
         </aside>
 
@@ -117,7 +141,7 @@ function Dashboard() {
           {/* Stats */}
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
             {stats.map(([I, l, v, c]) => (
-              <div key={l} className="panel flex items-center gap-3 p-3">
+              <div key={l} className="panel depth-card flex items-center gap-3 p-3">
                 <div className="grid h-12 w-12 place-items-center rounded-lg border border-border"><I className="h-7 w-7 text-primary glow-icon" /></div>
                 <div><div className="text-sm">{l}</div><div className="text-2xl font-bold">{v}</div><div className="text-xs text-success">↑ {c}</div></div>
               </div>
@@ -133,7 +157,7 @@ function Dashboard() {
               {/* Products */}
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-8">
                 {products.map(([I, t, s]) => (
-                  <div key={t} className="panel flex flex-col items-center p-3 text-center transition hover:-translate-y-0.5">
+                  <div key={t} className="panel depth-card holo-scan flex flex-col items-center p-3 text-center transition hover:-translate-y-0.5">
                     <I className="mb-1 h-8 w-8 text-accent glow-icon" />
                     <div className="text-sm font-semibold">{t}</div><div className="text-[11px] text-muted-foreground">{s}</div>
                   </div>
@@ -155,10 +179,11 @@ function Dashboard() {
 
                 {/* Jarvis core */}
                 <div className="relative overflow-hidden rounded-lg">
-                  <img src={jarvis} alt="Jarvis AI" width={1024} height={1024} className="absolute left-1/2 top-1/2 h-[115%] -translate-x-1/2 -translate-y-1/2 object-cover opacity-90 [mask-image:radial-gradient(circle,black_45%,transparent_70%)]" />
+                  <JarvisCore state={core} />
                   <div className="relative text-center">
                     <div className="pt-3 font-display text-3xl font-black tracking-[0.3em] text-primary glow-text">JARVIS</div>
                     <div className="font-display text-[10px] tracking-[0.3em] text-accent">AI COMMAND CENTER</div>
+                    <div aria-live="polite" className="mt-1 text-xs text-muted-foreground">{stateLabel[core]}</div>
                   </div>
                   <div className="relative flex justify-between p-3">
                     {[["DATA INPUTS", inputs], ["AI OUTPUTS", outputs]].map(([title, list], k) => (
@@ -223,16 +248,18 @@ function Dashboard() {
 
           {/* Voice bar */}
           <div className="panel mx-auto flex w-full max-w-4xl items-center gap-4 rounded-full px-3 py-2">
-            <button className="grid h-14 w-14 place-items-center rounded-full border-2 border-primary glow-icon"><Mic className="h-6 w-6 text-primary" /></button>
-            <input className="flex-1 bg-transparent text-lg outline-none placeholder:text-muted-foreground" placeholder="Hey Jarvis, how can I help you today?" />
+            <button aria-label="Talk to Jarvis" onClick={() => { clear(); setCore(core === "listening" ? "idle" : "listening"); }} className={`grid h-14 w-14 place-items-center rounded-full border-2 border-primary glow-icon ${core === "listening" ? "core-pulse bg-primary/20" : ""}`}><Mic className="h-6 w-6 text-primary" /></button>
+            <input value={cmd} onChange={(e) => { setCmd(e.target.value); if (core === "idle" && e.target.value) setCore("listening"); if (!e.target.value && core === "listening") setCore("idle"); }} onKeyDown={(e) => e.key === "Enter" && run()} aria-label="Command Jarvis" className="min-w-0 flex-1 bg-transparent text-lg outline-none placeholder:text-muted-foreground" placeholder="Hey Jarvis, how can I help you today?" />
             {[[UserCog, "Agents"], [Wrench, "Tools"], [FileText, "Files"], [Globe, "Web"]].map(([I, l]) => {
               const Icon = I as typeof Globe;
-              return <div key={l as string} className="hidden flex-col items-center px-2 text-xs sm:flex"><Icon className="h-5 w-5 text-primary" />{l as string}</div>;
+              const i = nav.findIndex(([, n]) => n === (l === "Agents" ? "Agents" : l === "Tools" ? "Development" : l === "Files" ? "Projects" : "APIs"));
+              return <button key={l as string} onClick={() => openModule(i)} className="hidden flex-col items-center px-2 text-xs sm:flex"><Icon className="h-5 w-5 text-primary" />{l as string}</button>;
             })}
-            <button className="grid h-12 w-12 place-items-center rounded-full bg-primary text-primary-foreground"><Send className="h-5 w-5" /></button>
+            <button aria-label="Send command" onClick={run} className="grid h-12 w-12 place-items-center rounded-full bg-primary text-primary-foreground"><Send className="h-5 w-5" /></button>
           </div>
         </main>
       </div>
+      {open !== null && nav[open] && <ModulePanel index={open} title={nav[open]![1]} Icon={nav[open]![0]} onClose={() => setOpen(null)} />}
     </div>
   );
 }
