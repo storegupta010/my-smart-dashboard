@@ -107,8 +107,8 @@ function Dashboard() {
     const idx = nav.findIndex(([, l]) => q.includes(l.toLowerCase().split(" ")[0] ?? ""));
     timers.current.push(window.setTimeout(() => setCore("executing"), 900));
     timers.current.push(window.setTimeout(() => setCore("verifying"), 1800));
-    timers.current.push(window.setTimeout(() => { if (idx >= 0) { setCore("completed"); setActive(idx); setOpen(idx); } else setCore("error"); }, 2700));
-    timers.current.push(window.setTimeout(() => setCore("idle"), 4200));
+    timers.current.push(window.setTimeout(() => { if (idx >= 0) { setCore("speaking"); timers.current.push(window.setTimeout(() => setCore("completed"), 1400)); setActive(idx); setOpen(idx); } else setCore("error"); }, 2700));
+    timers.current.push(window.setTimeout(() => setCore("idle"), 5600));
     setCmd("");
   };
   const openModule = (i: number) => { setActive(i); setOpen(i); };
@@ -195,7 +195,7 @@ function Dashboard() {
                 <div className="relative overflow-hidden rounded-lg" onMouseMove={(e) => { const b = e.currentTarget.getBoundingClientRect(); setTilt([(e.clientX - b.left) / b.width - 0.5, (e.clientY - b.top) / b.height - 0.5]); }} onMouseLeave={() => setTilt([0, 0])}>
                   <JarvisCore state={core} tilt={tilt} />
                   <div className="relative text-center">
-                    <div className="pt-3 font-display text-3xl font-black tracking-[0.3em] text-primary glow-text">JARVIS</div>
+                    <div className="pt-3 font-display text-3xl font-black tracking-[0.3em] text-primary glow-text">AYRA</div>
                     <div className="font-display text-[10px] tracking-[0.3em] text-accent">AI COMMAND CENTER</div>
                     <div aria-live="polite" className="mt-1 text-xs text-muted-foreground">{stateLabel[core]}</div>
                   </div>
@@ -263,7 +263,7 @@ function Dashboard() {
           {/* Voice bar */}
           <div className="panel mx-auto flex w-full max-w-4xl items-center gap-4 rounded-full px-3 py-2">
             <button aria-label="Talk to Jarvis" onClick={() => { clear(); setCore(core === "listening" ? "idle" : "listening"); inputRef.current?.focus(); }} className={`grid h-14 w-14 place-items-center rounded-full border-2 border-primary glow-icon ${core === "listening" ? "core-pulse bg-primary/20" : ""}`}><Mic className="h-6 w-6 text-primary" /></button>
-            <input ref={inputRef} title="Focus with Ctrl+K" value={cmd} onChange={(e) => { setCmd(e.target.value); if (core === "idle" && e.target.value) setCore("listening"); if (!e.target.value && core === "listening") setCore("idle"); }} onKeyDown={(e) => e.key === "Enter" && run()} aria-label="Command Jarvis" className="min-w-0 flex-1 bg-transparent text-lg outline-none placeholder:text-muted-foreground" placeholder="Hey Jarvis, how can I help you today?  (Ctrl+K)" />
+            <input ref={inputRef} title="Focus with Ctrl+K" value={cmd} onChange={(e) => { setCmd(e.target.value); if (core === "idle" && e.target.value) setCore("listening"); if (!e.target.value && core === "listening") setCore("idle"); }} onKeyDown={(e) => e.key === "Enter" && run()} aria-label="Command Jarvis" className="min-w-0 flex-1 bg-transparent text-lg outline-none placeholder:text-muted-foreground" placeholder="Hey AYRA, how can I help you today?  (Ctrl+K)" />
             {[[UserCog, "Agents"], [Wrench, "Tools"], [FileText, "Files"], [Globe, "Web"]].map(([I, l]) => {
               const Icon = I as typeof Globe;
               const i = nav.findIndex(([, n]) => n === (l === "Agents" ? "Agents" : l === "Tools" ? "Development" : l === "Files" ? "Projects" : "APIs"));
