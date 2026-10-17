@@ -182,3 +182,50 @@ body {
 @utility glow-icon {
   filter: drop-shadow(0 0 6px oklch(0.72 0.17 235 / 0.9));
 }
+
+/* ===== 7D sci-fi layer ===== */
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+@keyframes spin-rev { to { transform: rotate(-360deg); } }
+@keyframes pulse-core { 0%,100% { transform: scale(1); opacity: .9 } 50% { transform: scale(1.04); opacity: 1 } }
+@keyframes stream { from { stroke-dashoffset: 40 } to { stroke-dashoffset: 0 } }
+@keyframes scan { from { transform: translateY(-100%) } to { transform: translateY(100%) } }
+@keyframes holo-in { from { opacity: 0; transform: perspective(900px) rotateX(18deg) translateY(30px) scale(.94); filter: blur(6px) } to { opacity: 1; transform: none; filter: none } }
+@keyframes warp-in { from { opacity: 0; transform: scale(.3); filter: blur(12px) brightness(2) } to { opacity: 1; transform: none; filter: none } }
+@keyframes slide-in { from { opacity: 0; transform: perspective(900px) rotateY(-25deg) translateX(-80px) } to { opacity: 1; transform: none } }
+@keyframes iris-in { from { clip-path: circle(0% at 50% 50%) } to { clip-path: circle(75% at 50% 50%) } }
+@keyframes fade-up { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+
+@utility anim-holo { animation: holo-in .55s cubic-bezier(.2,.8,.2,1) both; }
+@utility anim-warp { animation: warp-in .55s cubic-bezier(.2,.8,.2,1) both; }
+@utility anim-slide { animation: slide-in .55s cubic-bezier(.2,.8,.2,1) both; }
+@utility anim-iris { animation: iris-in .6s cubic-bezier(.2,.8,.2,1) both; }
+@utility anim-fade-up { animation: fade-up .4s ease both; }
+@utility ring-spin { animation: spin-slow 24s linear infinite; }
+@utility ring-spin-rev { animation: spin-rev 16s linear infinite; }
+@utility core-pulse { animation: pulse-core 3s ease-in-out infinite; }
+@utility data-stream { stroke-dasharray: 4 6; animation: stream 1.2s linear infinite; }
+@utility depth-card {
+  transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s;
+  transform-style: preserve-3d;
+  &:hover { transform: perspective(700px) translateZ(14px) rotateX(4deg); box-shadow: 0 0 22px oklch(0.72 0.17 235 / .45), inset 0 0 18px oklch(0.6 0.18 240 / .25); }
+}
+@utility holo-scan {
+  position: relative; overflow: hidden;
+  &::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, transparent, oklch(0.82 0.14 210 / .12), transparent);
+    height: 40%; animation: scan 4s linear infinite; }
+}
+
+.core[data-state="listening"] { --core-glow: var(--success); }
+.core[data-state="thinking"] { --core-glow: var(--accent); }
+.core[data-state="executing"] { --core-glow: var(--warn); }
+.core[data-state="verifying"] { --core-glow: var(--primary); }
+.core { --core-glow: var(--primary); }
+.core-aura { box-shadow: 0 0 80px 10px color-mix(in oklab, var(--core-glow) 45%, transparent); transition: box-shadow .5s; }
+.core[data-state="thinking"] .ring-spin { animation-duration: 4s; }
+.core[data-state="executing"] .ring-spin-rev { animation-duration: 3s; }
+.core[data-state="idle"] .data-stream { animation-duration: 3s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+}
