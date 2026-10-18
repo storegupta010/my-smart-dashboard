@@ -9,6 +9,8 @@ import ayraViolet from "@/assets/ayra-violet.jpg";
 import ayraHeadset from "@/assets/ayra-headset.jpg";
 import ayraGold from "@/assets/ayra-gold.jpg";
 import ayraBob from "@/assets/ayra-bob.jpg";
+import ayraCrystal from "@/assets/ayra-crystal.jpg";
+import ayraVeil from "@/assets/ayra-veil.jpg";
 
 export type CoreState = "idle" | "listening" | "thinking" | "executing" | "verifying" | "speaking" | "completed" | "error";
 export const stateLabel: Record<CoreState, string> = {
@@ -28,6 +30,8 @@ export const AYRA_LOOKS = {
   headset: ayraHeadset,
   gold: ayraGold,
   bob: ayraBob,
+  crystal: ayraCrystal,
+  veil: ayraVeil,
 } as const;
 export type AyraLook = keyof typeof AYRA_LOOKS;
 
@@ -50,12 +54,12 @@ const stateLook: Record<CoreState, AyraLook> = {
  * looks (gold = festive). Add festival photos to AYRA_LOOKS and point here.
  */
 export const AYRA_SCHEDULE: { name: string; monthDay: string; look: AyraLook }[] = [
-  { name: "New Year", monthDay: "01-01", look: "gold" },
+  { name: "New Year", monthDay: "01-01", look: "veil" },
   { name: "Republic Day", monthDay: "01-26", look: "cyanJacket" },
-  { name: "Holi", monthDay: "03-04", look: "violet" },
+  { name: "Holi", monthDay: "03-04", look: "crystal" },
   { name: "Independence Day", monthDay: "08-15", look: "amberFront" },
   { name: "Diwali", monthDay: "11-08", look: "gold" },
-  { name: "Christmas", monthDay: "12-25", look: "violet" },
+  { name: "Christmas", monthDay: "12-25", look: "veil" },
 ];
 
 /** Occasion active today, if any. First match wins (no conflicts). */
