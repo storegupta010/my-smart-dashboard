@@ -106,10 +106,10 @@ export function JarvisCore({ state, tilt = [0, 0] }: { state: CoreState; tilt?: 
           </div>
         </div>
         {(state === "listening" || state === "speaking") && [0, 0.8, 1.6].map((d) => (
-          <span key={d} className="ayra-ripple absolute inset-[18%] rounded-full border border-accent" style={{ animationDelay: `${d}s` }} />
+          <span key={d} className="ayra-ripple absolute inset-x-[10%] inset-y-[6%] rounded-[2rem] border border-accent" style={{ animationDelay: `${d}s` }} />
         ))}
-        <div className="ayra-orbit absolute inset-[4%]"><span className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 rounded-full bg-accent shadow-[0_0_12px_var(--accent)]" /></div>
-        <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full">
+        <div className="ayra-orbit absolute inset-[2%]"><span className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 rounded-full bg-accent shadow-[0_0_12px_var(--accent)]" /></div>
+        <svg viewBox="0 0 100 133" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
           <g className="ring-spin origin-center" style={{ transformBox: "fill-box" }}>
             <circle cx="50" cy="50" r="44" fill="none" stroke="var(--primary)" strokeWidth=".4" strokeDasharray="8 4" opacity=".7" />
           </g>
