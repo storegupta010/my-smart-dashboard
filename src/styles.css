@@ -254,7 +254,9 @@ body {
 @keyframes speak { 0%,100% { transform: scaleX(.6) scaleY(.4); opacity: .4 } 50% { transform: scaleX(1) scaleY(1); opacity: .9 } }
 @keyframes ripple { from { transform: scale(.6); opacity: .8 } to { transform: scale(1.5); opacity: 0 } }
 @keyframes orbit { to { transform: rotate(360deg) } }
+@keyframes sway { 0%,100% { transform: rotate(-.6deg) translateX(-.4%) } 50% { transform: rotate(.6deg) translateX(.4%) } }
 @utility ayra-breathe { animation: breathe 6s ease-in-out infinite; }
+@utility ayra-sway { animation: sway 9s ease-in-out infinite; transform-origin: 50% 90%; }
 @utility ayra-eye { animation: blink 5s ease-in-out infinite, eye-glow 2.4s ease-in-out infinite; }
 @utility ayra-mouth { animation: speak .28s ease-in-out infinite; }
 @utility ayra-ripple { animation: ripple 2.4s ease-out infinite; }

@@ -78,7 +78,7 @@ export function JarvisCore({ state, tilt = [0, 0] }: { state: CoreState; tilt?: 
   });
   return (
     <div className="core pointer-events-none absolute inset-0 grid place-items-center" data-state={state}>
-      <div className="parallax relative aspect-square h-[92%]" style={{ transform: `perspective(900px) rotateY(${tilt[0] * 8}deg) rotateX(${-tilt[1] * 8}deg)` }}>
+      <div className="parallax relative aspect-[3/4] h-[92%]" style={{ transform: `perspective(900px) rotateY(${tilt[0] * 8}deg) rotateX(${-tilt[1] * 8}deg)` }}>
         {Array.from({ length: 10 }, (_, i) => (
           <span key={i} className="particle absolute bottom-[20%] h-1 w-1 rounded-full bg-accent" style={{ left: `${15 + i * 7}%`, animationDelay: `${i * 0.6}s` }} />
         ))}
@@ -90,20 +90,26 @@ export function JarvisCore({ state, tilt = [0, 0] }: { state: CoreState; tilt?: 
             {Array.from({ length: 9 }, (_, i) => <span key={i} className="wave-bar h-full w-1 rounded bg-success" style={{ animationDelay: `${i * 0.08}s` }} />)}
           </div>
         )}
-        <div className="core-aura absolute inset-[22%] rounded-full" />
-        <div className="ayra-breathe absolute inset-0">
-          {(Object.keys(AYRA_LOOKS) as AyraLook[]).map((k) => (
-            <img key={k} src={AYRA_LOOKS[k]} alt={k === look ? "AYRA holographic AI avatar" : ""} aria-hidden={k !== look}
-              width={768} height={768} loading={k === "default" ? "eager" : "lazy"}
-              className="core-pulse absolute inset-0 h-full w-full rounded-full object-cover transition-opacity duration-700 [mask-image:radial-gradient(circle,black_42%,transparent_68%)]"
-              style={{ opacity: k === look ? 1 : 0 }} />
-          ))}
+        <div className="core-aura absolute inset-[14%] rounded-full" />
+        {/* AYRA bust: full face, head, neck and shoulders — portrait frame, no circular crop */}
+        <div className="ayra-sway absolute inset-x-[6%] inset-y-[2%]">
+          <div className="ayra-breathe absolute inset-0">
+            {(Object.keys(AYRA_LOOKS) as AyraLook[]).map((k) => (
+              <img key={k} src={AYRA_LOOKS[k]} alt={k === look ? "AYRA holographic AI avatar" : ""} aria-hidden={k !== look}
+                width={768} height={1024} loading={k === "default" ? "eager" : "lazy"}
+                className="absolute inset-0 h-full w-full rounded-[1.6rem] object-cover object-top transition-opacity duration-700 [mask-image:linear-gradient(180deg,black_80%,transparent_99%)]"
+                style={{ opacity: k === look ? 1 : 0 }} />
+            ))}
+            {/* holographic sheen matched to dashboard palette */}
+            <div className="pointer-events-none absolute inset-0 rounded-[1.6rem] bg-gradient-to-b from-accent/10 via-transparent to-primary/20 mix-blend-screen" />
+            <div className="pointer-events-none absolute inset-0 rounded-[1.6rem] shadow-[inset_0_0_40px_oklch(0.72_0.17_235/0.25)]" />
+          </div>
         </div>
         {(state === "listening" || state === "speaking") && [0, 0.8, 1.6].map((d) => (
-          <span key={d} className="ayra-ripple absolute inset-[18%] rounded-full border border-accent" style={{ animationDelay: `${d}s` }} />
+          <span key={d} className="ayra-ripple absolute inset-x-[10%] inset-y-[6%] rounded-[2rem] border border-accent" style={{ animationDelay: `${d}s` }} />
         ))}
-        <div className="ayra-orbit absolute inset-[4%]"><span className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 rounded-full bg-accent shadow-[0_0_12px_var(--accent)]" /></div>
-        <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full">
+        <div className="ayra-orbit absolute inset-[2%]"><span className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 rounded-full bg-accent shadow-[0_0_12px_var(--accent)]" /></div>
+        <svg viewBox="0 0 100 133" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
           <g className="ring-spin origin-center" style={{ transformBox: "fill-box" }}>
             <circle cx="50" cy="50" r="44" fill="none" stroke="var(--primary)" strokeWidth=".4" strokeDasharray="8 4" opacity=".7" />
           </g>
