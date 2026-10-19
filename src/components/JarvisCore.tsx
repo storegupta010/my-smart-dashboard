@@ -70,7 +70,7 @@ export function activeOccasion(now = new Date()) {
 }
 
 /** Dashboard colour theme per look — matches each outfit's glow colour (hue, chroma). */
-const LOOK_THEME: Record<AyraLook, { primary: number; accent: number; c?: number }> = {
+export const LOOK_THEME: Record<AyraLook, { primary: number; accent: number; c?: number }> = {
   default: { primary: 235, accent: 210 },
   cyanSide: { primary: 230, accent: 205 },
   cyanJacket: { primary: 225, accent: 200 },
@@ -86,6 +86,23 @@ const LOOK_THEME: Record<AyraLook, { primary: number; accent: number; c?: number
   crystal: { primary: 310, accent: 290 },
 };
 
+/** Friendly display names for the lookbook panel. */
+export const LOOK_NAMES: Record<AyraLook, string> = {
+  default: "Cyan Classic",
+  cyanSide: "Cyan Profile",
+  cyanJacket: "Cyan Jacket",
+  braids: "Cyan Braids",
+  amberSide: "Amber Side",
+  amberFront: "Amber Armor",
+  amberProfile: "Amber Glow",
+  violet: "Violet Chrome",
+  headset: "Headset",
+  gold: "Gold Headpiece",
+  bob: "Orange Bob",
+  crystal: "Purple Crystal",
+  veil: "Bridal Veil",
+};
+
 function applyLookTheme(look: AyraLook) {
   const t = LOOK_THEME[look];
   const c = t.c ?? 0.17;
@@ -97,9 +114,9 @@ function applyLookTheme(look: AyraLook) {
 }
 
 /** Animated AI core: AYRA avatar, rings, aura and neural streams react to `state`. */
-export function JarvisCore({ state, tilt = [0, 0] }: { state: CoreState; tilt?: [number, number] }) {
+export function JarvisCore({ state, tilt = [0, 0], override = null }: { state: CoreState; tilt?: [number, number]; override?: AyraLook | null }) {
   const occasion = activeOccasion();
-  const look = occasion ? occasion.look : stateLook[state];
+  const look = override ?? (occasion ? occasion.look : stateLook[state]);
   useEffect(() => { applyLookTheme(look); }, [look]);
   const nodes = Array.from({ length: 14 }, (_, i) => {
     const a = (i / 14) * Math.PI * 2;
