@@ -4,11 +4,12 @@ import {
   Users, UserCog, Code2, Server, Network, BarChart3, LineChart, UsersRound, Settings, Package, Cpu,
   ShieldCheck, Store, Cloud, MessageCircle, Star, School, Calculator, Cog, Database, Github, Lock,
   HardDrive, Activity, Brain, Zap, FileText, Target, Lightbulb, TrendingUp, Mic, Wrench, Send,
-  Circle, CheckCircle2, AlertTriangle, Plug, CircleDot,
+  Circle, CheckCircle2, AlertTriangle, Plug, CircleDot, Sparkles,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { JarvisCore, stateLabel, type CoreState } from "@/components/JarvisCore";
+import { JarvisCore, stateLabel, type CoreState, type AyraLook } from "@/components/JarvisCore";
 import { ModulePanel } from "@/components/ModulePanel";
+import { LookbookPanel } from "@/components/LookbookPanel";
 import globe from "@/assets/globe.jpg";
 import worldmap from "@/assets/worldmap.jpg";
 
@@ -81,6 +82,8 @@ function Dashboard() {
   const [reply, setReply] = useState("");
   const [open, setOpen] = useState<number | null>(null);
   const [active, setActive] = useState(0);
+  const [lookOverride, setLookOverride] = useState<AyraLook | null>(null);
+  const [lookbook, setLookbook] = useState(false);
   const timers = useRef<number[]>([]);
   const [collapsed, setCollapsed] = useState(false);
   const [tilt, setTilt] = useState<[number, number]>([0, 0]);
@@ -223,10 +226,13 @@ function Dashboard() {
 
                 {/* Jarvis core */}
                 <div className="relative overflow-hidden rounded-lg" onMouseMove={(e) => { const b = e.currentTarget.getBoundingClientRect(); setTilt([(e.clientX - b.left) / b.width - 0.5, (e.clientY - b.top) / b.height - 0.5]); }} onMouseLeave={() => setTilt([0, 0])}>
-                  <JarvisCore state={core} tilt={tilt} />
+                  <JarvisCore state={core} tilt={tilt} override={lookOverride} />
                   <div className="relative text-center">
                     <div className="pt-3 font-display text-3xl font-black tracking-[0.3em] text-primary glow-text">AYRA</div>
                     <div className="font-display text-[10px] tracking-[0.3em] text-accent">AI COMMAND CENTER</div>
+                    <button onClick={() => setLookbook(true)} className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 font-display text-[10px] tracking-widest text-primary transition hover:bg-primary/20">
+                      <Sparkles className="h-3 w-3" />LOOKBOOK
+                    </button>
                     <div aria-live="polite" className="mt-1 text-xs text-muted-foreground">{stateLabel[core]}</div>
                     {reply && (
                       <div className="panel anim-fade-up mx-auto mt-2 max-w-md px-4 py-2 text-left text-sm leading-relaxed text-foreground">
@@ -309,6 +315,7 @@ function Dashboard() {
         </main>
       </div>
       {open !== null && nav[open] && <ModulePanel index={open} title={nav[open]![1]} Icon={nav[open]![0]} onClose={() => setOpen(null)} />}
+      {lookbook && <LookbookPanel current={lookOverride} onSelect={(l) => { setLookOverride(l); setLookbook(false); }} onClose={() => setLookbook(false)} />}
     </div>
   );
 }
