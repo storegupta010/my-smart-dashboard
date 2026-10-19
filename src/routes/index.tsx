@@ -78,6 +78,7 @@ const actions = [
 function Dashboard() {
   const [core, setCore] = useState<CoreState>("idle");
   const [cmd, setCmd] = useState("");
+  const [reply, setReply] = useState("");
   const [open, setOpen] = useState<number | null>(null);
   const [active, setActive] = useState(0);
   const timers = useRef<number[]>([]);
@@ -100,16 +101,45 @@ function Dashboard() {
     const k = (e: KeyboardEvent) => e.key === "Escape" && setOpen(null);
     window.addEventListener("keydown", k); return () => window.removeEventListener("keydown", k);
   }, []);
-  const run = () => {
-    if (!cmd.trim()) return;
-    clear(); setCore("thinking");
-    const q = cmd.toLowerCase();
+  const run = async () => {
+    const command = cmd.trim();
+    if (!command) return;
+    clear(); setReply(""); setCore("thinking"); setCmd("");
+    const q = command.toLowerCase();
     const idx = nav.findIndex(([, l]) => q.includes(l.toLowerCase().split(" ")[0] ?? ""));
-    timers.current.push(window.setTimeout(() => setCore("executing"), 900));
-    timers.current.push(window.setTimeout(() => setCore("verifying"), 1800));
-    timers.current.push(window.setTimeout(() => { if (idx >= 0) { setCore("speaking"); timers.current.push(window.setTimeout(() => setCore("completed"), 1400)); timers.current.push(window.setTimeout(() => { setActive(idx); setOpen(idx); }, 2200)); } else setCore("error"); }, 2700));
-    timers.current.push(window.setTimeout(() => setCore("idle"), 5600));
-    setCmd("");
+    try {
+      const res = await fetch("/api/ayra", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ command }),
+      });
+      if (!res.ok || !res.body) {
+        const data = (await res.json().catch(() => null)) as { error?: string } | null;
+        setReply(data?.error ?? "AYRA could not process that command.");
+        setCore("error");
+        timers.current.push(window.setTimeout(() => setCore("idle"), 4000));
+        return;
+      }
+      setCore("executing");
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let text = "";
+      let first = true;
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (first) { setCore("speaking"); first = false; }
+        text += decoder.decode(value, { stream: true });
+        setReply(text);
+      }
+      setCore("completed");
+      if (idx >= 0) timers.current.push(window.setTimeout(() => { setActive(idx); setOpen(idx); }, 1600));
+      timers.current.push(window.setTimeout(() => setCore("idle"), 6000));
+    } catch {
+      setReply("Connection to AYRA was lost. Please try again.");
+      setCore("error");
+      timers.current.push(window.setTimeout(() => setCore("idle"), 4000));
+    }
   };
   const openModule = (i: number) => { setActive(i); setOpen(i); };
   return (
@@ -198,6 +228,11 @@ function Dashboard() {
                     <div className="pt-3 font-display text-3xl font-black tracking-[0.3em] text-primary glow-text">AYRA</div>
                     <div className="font-display text-[10px] tracking-[0.3em] text-accent">AI COMMAND CENTER</div>
                     <div aria-live="polite" className="mt-1 text-xs text-muted-foreground">{stateLabel[core]}</div>
+                    {reply && (
+                      <div className="panel anim-fade-up mx-auto mt-2 max-w-md px-4 py-2 text-left text-sm leading-relaxed text-foreground">
+                        <span className="mr-1 font-display text-[10px] tracking-widest text-accent">AYRA:</span>{reply}
+                      </div>
+                    )}
                   </div>
                   <div className="relative flex justify-between p-3">
                     {[["DATA INPUTS", inputs], ["AI OUTPUTS", outputs]].map(([title, list], k) => (
