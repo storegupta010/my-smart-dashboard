@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import ayraDefault from "@/assets/ayra-cyan.jpg";
 import ayraCyanSide from "@/assets/ayra-cyan-side.jpg";
 import ayraCyanJacket from "@/assets/ayra-cyan-jacket.jpg";
@@ -68,10 +69,38 @@ export function activeOccasion(now = new Date()) {
   return AYRA_SCHEDULE.find((o) => o.monthDay === md) ?? null;
 }
 
+/** Dashboard colour theme per look — matches each outfit's glow colour (hue, chroma). */
+const LOOK_THEME: Record<AyraLook, { primary: number; accent: number; c?: number }> = {
+  default: { primary: 235, accent: 210 },
+  cyanSide: { primary: 230, accent: 205 },
+  cyanJacket: { primary: 225, accent: 200 },
+  braids: { primary: 220, accent: 195 },
+  headset: { primary: 240, accent: 215 },
+  veil: { primary: 215, accent: 195 },
+  amberSide: { primary: 60, accent: 75 },
+  amberFront: { primary: 65, accent: 80 },
+  amberProfile: { primary: 55, accent: 72 },
+  bob: { primary: 45, accent: 65 },
+  gold: { primary: 85, accent: 95, c: 0.14 },
+  violet: { primary: 300, accent: 285 },
+  crystal: { primary: 310, accent: 290 },
+};
+
+function applyLookTheme(look: AyraLook) {
+  const t = LOOK_THEME[look];
+  const c = t.c ?? 0.17;
+  const s = document.documentElement.style;
+  s.setProperty("--primary", `oklch(0.72 ${c} ${t.primary})`);
+  s.setProperty("--accent", `oklch(0.82 ${c * 0.85} ${t.accent})`);
+  s.setProperty("--ring", `oklch(0.72 ${c} ${t.primary})`);
+  s.setProperty("--border", `oklch(0.6 0.15 ${t.primary} / 0.35)`);
+}
+
 /** Animated AI core: AYRA avatar, rings, aura and neural streams react to `state`. */
 export function JarvisCore({ state, tilt = [0, 0] }: { state: CoreState; tilt?: [number, number] }) {
   const occasion = activeOccasion();
   const look = occasion ? occasion.look : stateLook[state];
+  useEffect(() => { applyLookTheme(look); }, [look]);
   const nodes = Array.from({ length: 14 }, (_, i) => {
     const a = (i / 14) * Math.PI * 2;
     return [50 + Math.cos(a) * 46, 50 + Math.sin(a) * 46] as const;
