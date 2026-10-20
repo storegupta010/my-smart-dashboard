@@ -113,7 +113,8 @@ export const LOOK_BG: Record<AyraLook, string> = {
 
 /** Paint the whole dashboard background with the photo's background; flip text for contrast. */
 function applyBackground(hex: string) {
-  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const ch = (i: number) => parseInt(hex.slice(i, i + 2), 16) / 255;
+  const r = ch(1), g = ch(3), b = ch(5);
   const light = 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.55;
   const s = document.documentElement.style;
   s.setProperty("--background", hex);
