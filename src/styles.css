@@ -166,8 +166,9 @@
   --font-display: "Orbitron", sans-serif;
 }
 body {
-  background: radial-gradient(ellipse at 50% 30%, oklch(0.22 0.09 250) 0%, var(--background) 60%);
+  background: var(--background);
   font-family: var(--font-sans);
+  transition: background-color .7s, color .7s;
 }
 @utility panel {
   position: relative;

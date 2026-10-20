@@ -104,12 +104,33 @@ export const LOOK_NAMES: Record<AyraLook, string> = {
   veil: "Bridal Veil",
 };
 
+/** Background colour measured from the edges of each AYRA photo. */
+export const LOOK_BG: Record<AyraLook, string> = {
+  default: "#e4e5e9", cyanSide: "#c5c2c4", cyanJacket: "#d8d8e0", braids: "#59819b",
+  amberSide: "#e4e4e9", amberFront: "#dedfe3", amberProfile: "#aaabad", violet: "#e4e8f0",
+  headset: "#b2b4be", gold: "#cec8c1", bob: "#bbd3e8", crystal: "#644f8e", veil: "#565c67",
+};
+
+/** Paint the whole dashboard background with the photo's background; flip text for contrast. */
+function applyBackground(hex: string) {
+  const ch = (i: number) => parseInt(hex.slice(i, i + 2), 16) / 255;
+  const r = ch(1), g = ch(3), b = ch(5);
+  const light = 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.55;
+  const s = document.documentElement.style;
+  s.setProperty("--background", hex);
+  s.setProperty("--foreground", light ? "oklch(0.2 0.03 260)" : "oklch(0.96 0.01 240)");
+  s.setProperty("--card-foreground", light ? "oklch(0.2 0.03 260)" : "oklch(0.96 0.01 240)");
+  s.setProperty("--card", light ? "oklch(1 0 0 / 0.55)" : "oklch(0.15 0.03 260 / 0.55)");
+  s.setProperty("--muted", light ? "oklch(0.88 0.01 260 / 0.8)" : "oklch(0.3 0.03 260 / 0.8)");
+  s.setProperty("--muted-foreground", light ? "oklch(0.42 0.03 260)" : "oklch(0.78 0.03 240)");
+}
+
 /** Animated AI core: AYRA avatar, rings, aura and neural streams react to `state`.
  *  `theme` (agent dress code) wins over AYRA's outfit colour when set. */
 export function JarvisCore({ state, tilt = [0, 0], override = null, theme = null }: { state: CoreState; tilt?: [number, number]; override?: AyraLook | null; theme?: DressCode | null }) {
   const occasion = activeOccasion();
   const look = override ?? (occasion ? occasion.look : stateLook[state]);
-  useEffect(() => { applyTheme(theme ?? LOOK_THEME[look]); }, [look, theme]);
+  useEffect(() => { applyTheme(theme ?? LOOK_THEME[look]); applyBackground(LOOK_BG[look]); }, [look, theme]);
   const nodes = Array.from({ length: 14 }, (_, i) => {
     const a = (i / 14) * Math.PI * 2;
     return [50 + Math.cos(a) * 46, 50 + Math.sin(a) * 46] as const;
