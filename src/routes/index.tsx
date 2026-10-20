@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { JarvisCore, stateLabel, type CoreState, type AyraLook } from "@/components/JarvisCore";
 import { ModulePanel } from "@/components/ModulePanel";
 import { LookbookPanel } from "@/components/LookbookPanel";
+import { AGENT_DRESS_CODE, dressColor } from "@/lib/agent-dress-code";
 import globe from "@/assets/globe.jpg";
 import worldmap from "@/assets/worldmap.jpg";
 
@@ -84,6 +85,7 @@ function Dashboard() {
   const [active, setActive] = useState(0);
   const [lookOverride, setLookOverride] = useState<AyraLook | null>(null);
   const [lookbook, setLookbook] = useState(false);
+  const [agentTheme, setAgentTheme] = useState<string | null>(null);
   const timers = useRef<number[]>([]);
   const [collapsed, setCollapsed] = useState(false);
   const [tilt, setTilt] = useState<[number, number]>([0, 0]);
@@ -226,7 +228,7 @@ function Dashboard() {
 
                 {/* Jarvis core */}
                 <div className="relative overflow-hidden rounded-lg" onMouseMove={(e) => { const b = e.currentTarget.getBoundingClientRect(); setTilt([(e.clientX - b.left) / b.width - 0.5, (e.clientY - b.top) / b.height - 0.5]); }} onMouseLeave={() => setTilt([0, 0])}>
-                  <JarvisCore state={core} tilt={tilt} override={lookOverride} />
+                  <JarvisCore state={core} tilt={tilt} override={lookOverride} theme={agentTheme ? AGENT_DRESS_CODE[agentTheme] ?? null : null} />
                   <div className="relative text-center">
                     <div className="pt-3 font-display text-3xl font-black tracking-[0.3em] text-primary glow-text">AYRA</div>
                     <div className="font-display text-[10px] tracking-[0.3em] text-accent">AI COMMAND CENTER</div>
@@ -288,15 +290,22 @@ function Dashboard() {
                 <img src={globe} alt="Globe" loading="lazy" width={816} height={816} className="w-full self-start rounded-full object-cover [mask-image:radial-gradient(circle,black_55%,transparent_72%)]" />
               </div>
               <div className="panel p-3">
-                <div className="mb-2 flex items-center justify-between"><h3 className="font-display text-sm">LIVE AGENT ACTIVITY</h3><span className="rounded border border-border px-2 py-0.5 text-xs">View All</span></div>
-                {agents.map(([n, t, p]) => (
-                  <div key={n} className="flex items-center gap-3 py-2">
-                    <div className="grid h-9 w-9 place-items-center rounded-full border border-border bg-muted"><Bot className="h-4 w-4 text-accent" /></div>
-                    <div className="flex-1 leading-tight"><div className="text-sm font-semibold">{n}</div><div className="text-xs text-muted-foreground">{t}</div></div>
-                    <div className="h-1.5 w-20 rounded bg-muted"><div className={`h-1.5 rounded ${p > 80 ? "bg-success" : "bg-primary"}`} style={{ width: `${p}%` }} /></div>
+                <div className="mb-2 flex items-center justify-between"><h3 className="font-display text-sm">LIVE AGENT ACTIVITY</h3>
+                  {agentTheme ? <button onClick={() => setAgentTheme(null)} className="rounded border border-border px-2 py-0.5 text-xs hover:bg-primary/15">Reset to AYRA</button> : <span className="text-xs text-muted-foreground">Tap an agent</span>}
+                </div>
+                {agents.map(([n, t, p]) => {
+                  const d = AGENT_DRESS_CODE[n];
+                  const sel = agentTheme === n;
+                  return (
+                  <button key={n} onClick={() => setAgentTheme(sel ? null : n)} aria-pressed={sel}
+                    className={`depth-card flex w-full items-center gap-3 rounded-md px-1 py-2 text-left ${sel ? "agent-selected" : ""}`}
+                    style={{ ["--agent" as string]: d ? dressColor(d) : "var(--primary)" }}>
+                    <div className="agent-orb grid h-9 w-9 place-items-center rounded-full"><Bot className="h-4 w-4" style={{ color: "var(--agent)" }} /></div>
+                    <div className="flex-1 leading-tight"><div className="text-sm font-semibold">{n}</div><div className="text-xs text-muted-foreground">{d ? `${d.role} · ${d.dress}` : t}</div></div>
+                    <div className="h-1.5 w-20 rounded bg-muted"><div className="agent-bar h-1.5 rounded" style={{ width: `${p}%` }} /></div>
                     <span className="w-8 text-right text-xs">{p}%</span>
-                  </div>
-                ))}
+                  </button>);
+                })}
               </div>
             </div>
           </div>
