@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { applyTheme, type DressCode } from "@/lib/agent-dress-code";
 import ayraDefault from "@/assets/ayra-cyan.jpg";
 import ayraCyanSide from "@/assets/ayra-cyan-side.jpg";
 import ayraCyanJacket from "@/assets/ayra-cyan-jacket.jpg";
@@ -103,21 +104,12 @@ export const LOOK_NAMES: Record<AyraLook, string> = {
   veil: "Bridal Veil",
 };
 
-function applyLookTheme(look: AyraLook) {
-  const t = LOOK_THEME[look];
-  const c = t.c ?? 0.17;
-  const s = document.documentElement.style;
-  s.setProperty("--primary", `oklch(0.72 ${c} ${t.primary})`);
-  s.setProperty("--accent", `oklch(0.82 ${c * 0.85} ${t.accent})`);
-  s.setProperty("--ring", `oklch(0.72 ${c} ${t.primary})`);
-  s.setProperty("--border", `oklch(0.6 0.15 ${t.primary} / 0.35)`);
-}
-
-/** Animated AI core: AYRA avatar, rings, aura and neural streams react to `state`. */
-export function JarvisCore({ state, tilt = [0, 0], override = null }: { state: CoreState; tilt?: [number, number]; override?: AyraLook | null }) {
+/** Animated AI core: AYRA avatar, rings, aura and neural streams react to `state`.
+ *  `theme` (agent dress code) wins over AYRA's outfit colour when set. */
+export function JarvisCore({ state, tilt = [0, 0], override = null, theme = null }: { state: CoreState; tilt?: [number, number]; override?: AyraLook | null; theme?: DressCode | null }) {
   const occasion = activeOccasion();
   const look = override ?? (occasion ? occasion.look : stateLook[state]);
-  useEffect(() => { applyLookTheme(look); }, [look]);
+  useEffect(() => { applyTheme(theme ?? LOOK_THEME[look]); }, [look, theme]);
   const nodes = Array.from({ length: 14 }, (_, i) => {
     const a = (i / 14) * Math.PI * 2;
     return [50 + Math.cos(a) * 46, 50 + Math.sin(a) * 46] as const;
